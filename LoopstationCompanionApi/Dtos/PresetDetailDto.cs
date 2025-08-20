@@ -2,10 +2,12 @@
 
 namespace LoopstationCompanionApi.Dtos
 {
-    public record PresetListItemDto(
+    public record PresetDetailDto(
         Guid Id,
         string Name,
         DeviceModel DeviceModel,
-        DateTime UpdatedAt
+        DateTime UpdatedAt,
+        string JsonModel
     );
+
 }
