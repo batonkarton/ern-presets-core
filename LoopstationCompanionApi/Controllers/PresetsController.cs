@@ -8,10 +8,9 @@ namespace LoopstationCompanionApi.Controllers
     [Route("api/[controller]")]
     public class PresetsController : ControllerBase
     {
-
-        private static readonly List<Preset> _presets =
+        private static readonly List<PresetDto> _presets =
         [
-            new() { Name = "Default Vocal", DeviceModel = "RC-505mkII"},
+            new() {  Name = "Default Vocal", DeviceModel = "RC-505mkII"},
             new() { Name = "Beatbox Chain", DeviceModel = "RC-505mkII"}
         ];
 
@@ -20,7 +19,7 @@ namespace LoopstationCompanionApi.Controllers
         /// Returns a list of all presets (from in-memory store for now).
         /// </summary>
         [HttpGet]
-        public ActionResult<IEnumerable<PresetListItemDto>> GetAll(
+        public ActionResult<IEnumerable<Preset>> GetAll(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 20)
         {
@@ -31,7 +30,7 @@ namespace LoopstationCompanionApi.Controllers
                 .OrderByDescending(p => p.UpdatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(p => new PresetListItemDto(p.Id, p.Name, p.DeviceModel, p.UpdatedAt))
+                .Select(p => new Preset() { Id = p.Id, DeviceModel = p.DeviceModel, Name = p.Name, UpdatedAt = p.UpdatedAt })
                 .ToList();
 
             return Ok(items);
