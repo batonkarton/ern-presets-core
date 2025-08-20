@@ -2,7 +2,7 @@
 
 namespace LoopstationCompanionApi.Dtos
 {
-    public record UpdatePresetRequest(
+    public record PresetUpdateDto(
         string? Name,
         DeviceModel? DeviceModel
     );
