@@ -14,8 +14,10 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Build Solution
-      run: dotnet build --configuration Release
-      
+      id: build
+      run: |
+        cd LoopstationCompanionApi
+        dotnet build --configuration Release
     - name: Delete previous comments
       uses: actions/github-script@v6
       with:
@@ -46,11 +48,11 @@ jobs:
         echo "PR body - $PR_BODY - ${#PR_BODY}"
 
         # Define the regex pattern for the PR title
-        TITLE_REGEX=".*ISSUE-[0-9]+.*"
+        TITLE_REGEX=".*LPC-[0-9]+.*"
         
         # Validate the PR title using the regex
         if [[ ! "$PR_TITLE" =~ $TITLE_REGEX || ${#PR_TITLE} -lt 5 ]]; then
-          echo "PR title does not match the required format: [ISSUE-<number> followed by at least 5 characters]"
+          echo "PR title does not match the required format: [LPC-<number> followed by at least 5 characters]"
           echo "::set-output name=valid::false"
         elif [[ ${#PR_BODY} -lt 10 ]]; then
           echo "PR description is too short"
@@ -69,7 +71,7 @@ jobs:
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: "🚨 The PR title or description is invalid. Please ensure the title has ISSUE number. The description should be at least 10 characters long."
+            body: "🚨 The PR title or description is invalid. Please ensure the title has LPC number. The description should be at least 10 characters long."
           })
 
     - name: Comment on PR if validation succeeds
