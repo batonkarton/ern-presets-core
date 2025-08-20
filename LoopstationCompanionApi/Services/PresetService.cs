@@ -7,7 +7,6 @@ namespace LoopstationCompanionApi.Services
     public class PresetService : IPresetService
     {
         private readonly IPresetRepository _repo;
-
         public PresetService(IPresetRepository repo) => _repo = repo;
 
         public async Task<IReadOnlyList<Preset>> GetAllAsync(int page, int pageSize)
