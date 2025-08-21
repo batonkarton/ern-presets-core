@@ -1,14 +1,20 @@
 [
   {
-    "id": "f7b54f7d-1a3b-4b1e-bd9f-8b5f6b2f5a10",
-    "name": "Default Vocal",
-    "deviceModel": "RC-505mkII",
-    "updatedAt": "2025-04-01T12:00:00Z"
+    "Id": "f7b54f7d-1a3b-4b1e-bd9f-8b5f6b2f5a10",
+    "Name": "Default Vocal",
+    "DeviceModel": "RC-505mkII",
+    "UpdatedAt": "2025-04-01T12:00:00Z"
   },
   {
-    "id": "3c4f8e2e-5c3a-4a4b-9c55-6c9c2f0f1a22",
-    "name": "Beatbox Chain",
-    "deviceModel": "RC-505mkII",
-    "updatedAt": "2025-04-02T09:30:00Z"
+    "Id": "3c4f8e2e-5c3a-4a4b-9c55-6c9c2f0f1a22",
+    "Name": "new",
+    "DeviceModel": "RC-505mkII",
+    "UpdatedAt": "2025-08-21T08:00:35.564999Z"
+  },
+  {
+    "Id": "0d757c58-d302-4004-9be8-a718c61f90cb",
+    "Name": "New preset",
+    "DeviceModel": "RC-505mkII",
+    "UpdatedAt": "2025-08-21T08:00:53.0091191Z"
   }
 ]
