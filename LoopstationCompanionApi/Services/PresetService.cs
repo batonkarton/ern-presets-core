@@ -49,8 +49,6 @@ namespace LoopstationCompanionApi.Services
             return saved is null ? null : MapToModel(saved);
         }
 
-
-
         public Task<bool> DeleteAsync(Guid id) => _repo.DeleteAsync(id);
 
         private static Preset MapToModel(PresetDto dto) => new()
@@ -70,7 +68,5 @@ namespace LoopstationCompanionApi.Services
             DeviceModel = model.DeviceModel.ToString(),
             UpdatedAt = model.UpdatedAt
         };
-
-
     }
 }

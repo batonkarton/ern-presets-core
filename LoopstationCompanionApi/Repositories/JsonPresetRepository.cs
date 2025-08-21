@@ -81,7 +81,6 @@ namespace LoopstationCompanionApi.Repositories
             return removed;
         }
 
-        // ---- helpers ----
         private Task<List<PresetDto>> LoadAllAsync()
         {
             lock (_gate)
@@ -101,7 +100,6 @@ namespace LoopstationCompanionApi.Repositories
                 return Task.CompletedTask;
             }
         }
-
         private void EnsureFileWithSeed()
         {
             if (File.Exists(_dbPath)) return;
