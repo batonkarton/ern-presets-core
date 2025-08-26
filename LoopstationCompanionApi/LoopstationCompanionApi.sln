@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36408.4 d17.14
+VisualStudioVersion = 17.14.36408.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoopstationCompanionApi", "LoopstationCompanionApi.csproj", "{84161BD4-BBA0-47DE-9AE7-A3A44CB686A3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoopstationCompanionApi.Tests", "LoopstationCompanionApi.Tests\LoopstationCompanionApi.Tests.csproj", "{FCF0BC7F-FDD6-4E46-AA8B-0DFA1D6BECE6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,9 +19,16 @@ Global
 		{84161BD4-BBA0-47DE-9AE7-A3A44CB686A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84161BD4-BBA0-47DE-9AE7-A3A44CB686A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84161BD4-BBA0-47DE-9AE7-A3A44CB686A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FCF0BC7F-FDD6-4E46-AA8B-0DFA1D6BECE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCF0BC7F-FDD6-4E46-AA8B-0DFA1D6BECE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCF0BC7F-FDD6-4E46-AA8B-0DFA1D6BECE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCF0BC7F-FDD6-4E46-AA8B-0DFA1D6BECE6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FCF0BC7F-FDD6-4E46-AA8B-0DFA1D6BECE6} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7443718F-7495-447B-98A0-1D43061B8460}
