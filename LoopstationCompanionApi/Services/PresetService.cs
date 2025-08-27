@@ -29,7 +29,6 @@ namespace LoopstationCompanionApi.Services
                 };
             }).ToList();
         }
-
         public async Task<Preset?> GetByIdAsync(Guid id)
         {
             var dto = await _repo.GetByIdAsync(id);
@@ -51,7 +50,6 @@ namespace LoopstationCompanionApi.Services
             return MapToModel(saved);
         }
 
-
         public async Task<Preset?> UpdateAsync(Guid id, Preset preset)
         {
             var existing = await _repo.GetByIdAsync(id);
@@ -72,14 +70,13 @@ namespace LoopstationCompanionApi.Services
             var existing = await _repo.GetByIdAsync(id);
             if (existing is null) return null;
 
-            if (file.Length == 0) throw new InvalidDataException("Uploaded file is empty.");
-
-            await using var stream = file.OpenReadStream();
-            var payloadJson = await _importer.ImportAndSanitizeAsync(stream, ct);
+            // Let the importer handle all file work + validation + JSON payload creation
+            var payloadJson = await _importer.ImportAndSanitizeAsync(file, ct);
 
             var updated = await _repo.UpdatePayloadAsync(id, payloadJson, DateTime.UtcNow);
             return updated is null ? null : MapToModel(updated);
         }
+
 
         private static Preset MapToModel(PresetDto dto)
         {
@@ -102,7 +99,6 @@ namespace LoopstationCompanionApi.Services
                 Payload = payload
             };
         }
-
 
         private static PresetDto MapToDto(Preset model) => new()
         {

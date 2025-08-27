@@ -2,6 +2,6 @@
 {
     public interface IRc0Importer
     {
-        Task<string> ImportAndSanitizeAsync(Stream rc0Stream, CancellationToken ct = default);
+        Task<string> ImportAndSanitizeAsync(IFormFile file, CancellationToken ct = default);
     }
 }

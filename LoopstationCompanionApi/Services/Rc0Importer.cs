@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using LoopstationCompanionApi.Constants;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
@@ -13,9 +14,14 @@ namespace LoopstationCompanionApi.Services
 
             public Rc0Importer(IRc0Validator validator) => _validator = validator;
 
-            public async Task<string> ImportAndSanitizeAsync(Stream rc0Stream, CancellationToken ct = default)
+            public async Task<string> ImportAndSanitizeAsync(IFormFile file, CancellationToken ct = default)
             {
-                using var reader = new StreamReader(rc0Stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 64 * 1024, leaveOpen: true);
+                if (file is null) throw new ArgumentNullException(nameof(file));
+                if (file.Length == 0) throw new InvalidDataException("Uploaded file is empty.");
+
+                // Open the stream INSIDE the importer (single responsibility)
+                using var stream = file.OpenReadStream();
+                using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 64 * 1024, leaveOpen: false);
                 var raw = await reader.ReadToEndAsync();
 
                 var cleaned = CleanXmlContent(raw);
@@ -24,7 +30,6 @@ namespace LoopstationCompanionApi.Services
                     throw new InvalidDataException("RC0 validation failed: " + string.Join("; ", errors));
 
                 var payload = BuildSanitizedPayload(cleaned);
-
                 return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = false });
             }
 
@@ -32,27 +37,31 @@ namespace LoopstationCompanionApi.Services
             private string CleanXmlContent(string xml)
             {
                 // Replace <0>, </0> ... → <NUM_0>, </NUM_0>
-                string cleaned = Regex.Replace(xml, "<([0-9])>", "<NUM_$1>");
-                cleaned = Regex.Replace(cleaned, "</([0-9])>", "</NUM_$1>");
+                string cleaned = Regex.Replace(xml, XmlRegexPatterns.OpenNumericTag, XmlRegexPatterns.OpenNumericReplacement);
+                cleaned = Regex.Replace(cleaned, XmlRegexPatterns.CloseNumericTag, XmlRegexPatterns.CloseNumericReplacement);
 
-                // Replace single symbol tags <#> → <SYMBOL_HASH>
-                cleaned = Regex.Replace(cleaned, "<([^\\w\\.-:])>", m => $"<SYMBOL_{SymbolToName(m.Groups[1].Value)}>");
-                cleaned = Regex.Replace(cleaned, "</([^\\w\\.-:])>", m => $"</SYMBOL_{SymbolToName(m.Groups[1].Value)}>");
+                // Replace single symbol tags <#> → <SYMBOL_HASH>, etc.
+                cleaned = Regex.Replace(xml, XmlRegexPatterns.OpenSymbolTag,
+                    m => string.Format(XmlRegexPatterns.OpenSymbolReplacement, SymbolToName(m.Groups[1].Value)));
+
+                cleaned = Regex.Replace(cleaned, XmlRegexPatterns.CloseSymbolTag,
+                    m => string.Format(XmlRegexPatterns.CloseSymbolReplacement, SymbolToName(m.Groups[1].Value)));
 
                 // Drop <count>...</count>
-                cleaned = Regex.Replace(cleaned, "<count>.*?</count>", "", RegexOptions.Singleline);
+                cleaned = Regex.Replace(cleaned, XmlRegexPatterns.CountTagPattern, "", RegexOptions.Singleline);
 
                 return cleaned.Trim();
             }
 
+
             private static string SymbolToName(string symbol) => symbol switch
             {
-                "#" => "HASH",
-                "$" => "DOLLAR",
-                "@" => "AT",
-                "%" => "PERCENT",
-                "&" => "AMPERSAND",
-                "*" => "ASTERISK",
+                "#" => XmlConstants.SymbolHash,
+                "$" => XmlConstants.SymbolDollar,
+                "@" => XmlConstants.SymbolAt,
+                "%" => XmlConstants.SymbolPercent,
+                "&" => XmlConstants.SymbolAmpersand,
+                "*" => XmlConstants.SymbolAsterisk,
                 _ => Uri.EscapeDataString(symbol)
             };
 
@@ -63,30 +72,30 @@ namespace LoopstationCompanionApi.Services
                 if (xdoc.Root is null) throw new InvalidDataException("No root element.");
 
                 // Find <database>
-                XElement? database = string.Equals(xdoc.Root.Name.LocalName, "database", StringComparison.OrdinalIgnoreCase)
+                XElement? database = string.Equals(xdoc.Root.Name.LocalName, XmlConstants.DatabaseTag, StringComparison.OrdinalIgnoreCase)
                     ? xdoc.Root
-                    : xdoc.Root.Element("database") ?? xdoc.Root.Elements().FirstOrDefault(e =>
-                        string.Equals(e.Name.LocalName, "database", StringComparison.OrdinalIgnoreCase));
+                    : xdoc.Root.Element(XmlConstants.DatabaseTag) ?? xdoc.Root.Elements().FirstOrDefault(e =>
+                        string.Equals(e.Name.LocalName, XmlConstants.DatabaseTag, StringComparison.OrdinalIgnoreCase));
 
-                if (database is null) throw new InvalidDataException("Missing <database>.");
+                if (database is null) throw new InvalidDataException($"Missing <{XmlConstants.DatabaseTag}>.");
 
                 // Find <ifx> under <database>
-                XElement? ifx = database.Element("ifx") ?? database.Elements().FirstOrDefault(e =>
-                    string.Equals(e.Name.LocalName, "ifx", StringComparison.OrdinalIgnoreCase));
-                if (ifx is null) throw new InvalidDataException("Missing <ifx>.");
+                XElement? ifx = database.Element(XmlConstants.IfxTag) ?? database.Elements().FirstOrDefault(e =>
+                    string.Equals(e.Name.LocalName, XmlConstants.IfxTag, StringComparison.OrdinalIgnoreCase));
+                if (ifx is null) throw new InvalidDataException($"Missing <{XmlConstants.IfxTag}>.");
 
                 var effects = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
                 foreach (var eff in ifx.Elements())
                 {
-                    if (string.Equals(eff.Name.LocalName, "_attributes", StringComparison.OrdinalIgnoreCase)) continue;
+                    if (string.Equals(eff.Name.LocalName, XmlConstants.AttributesTag, StringComparison.OrdinalIgnoreCase)) continue;
 
                     var effectKey = eff.Name.LocalName; // e.g. AA_LPF
                     var mapped = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
                     foreach (var param in eff.Elements())
                     {
-                        var key = param.Name.LocalName;           // A, B, NUM_0, SYMBOL_HASH, etc.
+                        var key = param.Name.LocalName;
                         var raw = (param.Value ?? string.Empty).Trim();
 
                         var meta = EffectMeta.GetParamMeta(effectKey, key);
@@ -108,6 +117,7 @@ namespace LoopstationCompanionApi.Services
                     }
                 };
             }
+
 
             private static string ClampToRange(string raw, int min, int max)
             {

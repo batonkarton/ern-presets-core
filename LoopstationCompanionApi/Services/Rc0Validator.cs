@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using LoopstationCompanionApi.Constants;
+using System.Xml.Linq;
 
 namespace LoopstationCompanionApi.Services
 {
@@ -29,37 +30,40 @@ namespace LoopstationCompanionApi.Services
             var rootName = doc.Root.Name.LocalName;
             XElement? database = null;
 
-            if (string.Equals(rootName, "database", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(rootName, XmlConstants.DatabaseTag, StringComparison.OrdinalIgnoreCase))
             {
                 database = doc.Root;
             }
             else
             {
-                database = doc.Root.Element("database")
+                database = doc.Root.Element(XmlConstants.DatabaseTag)
                            ?? doc.Root.Elements().FirstOrDefault(e =>
-                                string.Equals(e.Name.LocalName, "database", StringComparison.OrdinalIgnoreCase));
+                                string.Equals(e.Name.LocalName, XmlConstants.DatabaseTag, StringComparison.OrdinalIgnoreCase));
             }
 
             if (database is null)
             {
-                errors.Add("Missing <database> element.");
+                errors.Add($"Missing <{XmlConstants.DatabaseTag}> element.");
                 return Task.FromResult<IReadOnlyList<string>>(errors);
             }
 
-            // <ifx> can be child somewhere under <database> (sibling to <mem>, etc)
-            var ifx = database.Element("ifx")
+            // <ifx> can be a child somewhere under <database> (sibling to <mem>, etc.)
+            var ifx = database.Element(XmlConstants.IfxTag)
                       ?? database.Elements().FirstOrDefault(e =>
-                            string.Equals(e.Name.LocalName, "ifx", StringComparison.OrdinalIgnoreCase));
+                           string.Equals(e.Name.LocalName, XmlConstants.IfxTag, StringComparison.OrdinalIgnoreCase));
 
             if (ifx is null)
             {
-                errors.Add("Missing <ifx> element under <database>.");
+                errors.Add($"Missing <{XmlConstants.IfxTag}> element under <{XmlConstants.DatabaseTag}>.");
                 return Task.FromResult<IReadOnlyList<string>>(errors);
             }
 
-            var effects = ifx.Elements().Where(e => !string.Equals(e.Name.LocalName, "_attributes", StringComparison.OrdinalIgnoreCase)).ToList();
+            var effects = ifx.Elements()
+                .Where(e => !string.Equals(e.Name.LocalName, XmlConstants.AttributesTag, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
             if (effects.Count == 0)
-                errors.Add("No effects found in <ifx>.");
+                errors.Add($"No effects found in <{XmlConstants.IfxTag}>.");
 
             // Basic param sanity
             foreach (var eff in effects)
