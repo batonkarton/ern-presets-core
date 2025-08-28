@@ -11,7 +11,6 @@ namespace LoopstationCompanionApi.Services
         public class Rc0Importer : IRc0Importer
         {
             private readonly IRc0Validator _validator;
-
             public Rc0Importer(IRc0Validator validator) => _validator = validator;
 
             public async Task<string> ImportAndSanitizeAsync(IFormFile file, CancellationToken ct = default)
@@ -19,7 +18,6 @@ namespace LoopstationCompanionApi.Services
                 if (file is null) throw new ArgumentNullException(nameof(file));
                 if (file.Length == 0) throw new InvalidDataException("Uploaded file is empty.");
 
-                // Open the stream INSIDE the importer (single responsibility)
                 using var stream = file.OpenReadStream();
                 using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 64 * 1024, leaveOpen: false);
                 var raw = await reader.ReadToEndAsync();
@@ -33,7 +31,6 @@ namespace LoopstationCompanionApi.Services
                 return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = false });
             }
 
-            // ======= CLEANING =======
             private string CleanXmlContent(string xml)
             {
                 // Replace <0>, </0> ... → <NUM_0>, </NUM_0>
@@ -53,7 +50,6 @@ namespace LoopstationCompanionApi.Services
                 return cleaned.Trim();
             }
 
-
             private static string SymbolToName(string symbol) => symbol switch
             {
                 "#" => XmlConstants.SymbolHash,
@@ -65,7 +61,7 @@ namespace LoopstationCompanionApi.Services
                 _ => Uri.EscapeDataString(symbol)
             };
 
-            // ======= BUILD FE-READY PAYLOAD =======
+            // BUILD FE-READY PAYLOAD
             private object BuildSanitizedPayload(string cleanedXml)
             {
                 var xdoc = XDocument.Parse(cleanedXml, LoadOptions.PreserveWhitespace);
@@ -117,7 +113,6 @@ namespace LoopstationCompanionApi.Services
                     }
                 };
             }
-
 
             private static string ClampToRange(string raw, int min, int max)
             {

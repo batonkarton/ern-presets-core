@@ -70,13 +70,11 @@ namespace LoopstationCompanionApi.Services
             var existing = await _repo.GetByIdAsync(id);
             if (existing is null) return null;
 
-            // Let the importer handle all file work + validation + JSON payload creation
             var payloadJson = await _importer.ImportAndSanitizeAsync(file, ct);
 
             var updated = await _repo.UpdatePayloadAsync(id, payloadJson, DateTime.UtcNow);
             return updated is null ? null : MapToModel(updated);
         }
-
 
         private static Preset MapToModel(PresetDto dto)
         {
