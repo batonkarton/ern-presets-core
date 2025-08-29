@@ -15,9 +15,10 @@ jobs:
 
     - name: Build Solution
       id: build
-      run: |
-        cd LoopstationCompanionApi
-        dotnet build --configuration Release
+      run: dotnet build --configuration Release
+    - name: Run Unit tests
+      id: test
+      run: dotnet test --configuration Release
     - name: Delete previous comments
       uses: actions/github-script@v6
       with:

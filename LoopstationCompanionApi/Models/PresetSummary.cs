@@ -1,17 +1,10 @@
 ﻿namespace LoopstationCompanionApi.Models
 {
-    public enum DeviceModel
-    {
-        RC505mkII,
-        RC505mkI
-    }
-
-    public class Preset
+    public class PresetSummary
     {
         public Guid Id { get; init; }
         public string Name { get; set; } = string.Empty;
         public DeviceModel DeviceModel { get; set; } = DeviceModel.RC505mkII;
         public DateTime UpdatedAt { get; set; }
-        public object? Payload { get; set; }
     }
 }

@@ -13,7 +13,7 @@ namespace LoopstationCompanionApi.Controllers
 
         // GET /api/presets
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Preset>>> GetAll(
+        public async Task<ActionResult<IEnumerable<PresetSummary>>> GetAll(
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 20)
         {
@@ -67,6 +67,31 @@ namespace LoopstationCompanionApi.Controllers
         {
             var removed = await _service.DeleteAsync(id);
             return removed ? NoContent() : NotFound();
+        }
+
+        // POST /api/presets/{id}/import
+        [HttpPost("{id:guid}/import")]
+        [RequestSizeLimit(10 * 1024 * 1024)]
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult<Preset>> ImportRc0(
+            Guid id,
+            [FromForm] ImportRc0Request request,
+            CancellationToken ct)
+        {
+            if (request?.File is null)
+                return BadRequest("File is required.");
+            if (!request.File.FileName.EndsWith(".rc0", StringComparison.OrdinalIgnoreCase))
+                return BadRequest("Only .rc0 files are supported.");
+
+            try
+            {
+                var updated = await _service.ImportRc0Async(id, request.File, ct);
+                return updated is null ? NotFound() : Ok(updated);
+            }
+            catch (InvalidDataException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }
