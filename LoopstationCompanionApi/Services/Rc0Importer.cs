@@ -37,7 +37,6 @@ namespace LoopstationCompanionApi.Services
                 string cleaned = Regex.Replace(xml, XmlRegexPatterns.OpenNumericTag, XmlRegexPatterns.OpenNumericReplacement);
                 cleaned = Regex.Replace(cleaned, XmlRegexPatterns.CloseNumericTag, XmlRegexPatterns.CloseNumericReplacement);
 
-                // symbol tags — use 'cleaned', not 'xml'
                 cleaned = Regex.Replace(cleaned, XmlRegexPatterns.OpenSymbolTag,
                     m => string.Format(XmlRegexPatterns.OpenSymbolReplacement, SymbolToName(m.Groups[1].Value)));
 
@@ -49,7 +48,6 @@ namespace LoopstationCompanionApi.Services
 
                 return cleaned.Trim();
             }
-
 
             private static string SymbolToName(string symbol) => symbol switch
             {
@@ -98,7 +96,7 @@ namespace LoopstationCompanionApi.Services
                         var meta = EffectMeta.GetParamMeta(effectKey, key);
                         var clamped = ClampToRange(raw, meta.Min, meta.Max);
 
-                        mapped[meta.Label] = new Dictionary<string, object> { ["_text"] = clamped };
+                        mapped[meta.Label] = new Dictionary<string, string> { ["_text"] = clamped };
                     }
 
                     effects[effectKey] = mapped;
