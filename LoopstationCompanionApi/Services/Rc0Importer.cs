@@ -33,18 +33,18 @@ namespace LoopstationCompanionApi.Services
 
             private string CleanXmlContent(string xml)
             {
-                // Replace <0>, </0> ... → <NUM_0>, </NUM_0>
+                // numeric tags
                 string cleaned = Regex.Replace(xml, XmlRegexPatterns.OpenNumericTag, XmlRegexPatterns.OpenNumericReplacement);
                 cleaned = Regex.Replace(cleaned, XmlRegexPatterns.CloseNumericTag, XmlRegexPatterns.CloseNumericReplacement);
 
-                // Replace single symbol tags <#> → <SYMBOL_HASH>, etc.
-                cleaned = Regex.Replace(xml, XmlRegexPatterns.OpenSymbolTag,
+                // symbol tags — use 'cleaned', not 'xml'
+                cleaned = Regex.Replace(cleaned, XmlRegexPatterns.OpenSymbolTag,
                     m => string.Format(XmlRegexPatterns.OpenSymbolReplacement, SymbolToName(m.Groups[1].Value)));
 
                 cleaned = Regex.Replace(cleaned, XmlRegexPatterns.CloseSymbolTag,
                     m => string.Format(XmlRegexPatterns.CloseSymbolReplacement, SymbolToName(m.Groups[1].Value)));
 
-                // Drop <count>...</count>
+                // drop <count>...</count>
                 cleaned = Regex.Replace(cleaned, XmlRegexPatterns.CountTagPattern, "", RegexOptions.Singleline);
 
                 return cleaned.Trim();
