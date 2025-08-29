@@ -9,5 +9,6 @@ namespace LoopstationCompanionApi.Repositories
         Task<PresetDto> CreateAsync(PresetDto dto);
         Task<PresetDto?> UpdateAsync(Guid id, PresetDto dto);
         Task<bool> DeleteAsync(Guid id);
+        Task<PresetDto?> UpdatePayloadAsync(Guid id, string payloadJson, DateTime updatedAt);
     }
 }
