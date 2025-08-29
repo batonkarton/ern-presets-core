@@ -41,20 +41,17 @@ namespace LoopstationCompanionApi.Services
 
             foreach (var effect in EffectMeta.EffectKeys())
             {
-                // Provided effect block from partial (may be null)
-                var providedEffect = GetChildDict(partial, effect);
-
-                // Build merged param dict
+                var providedEffect = GetChildDict(partial, effect); // keep this (effect block is IDictionary<string, object>)
                 var mergedParams = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
-                // Ensure all known params exist (take provided value if present, else meta default)
                 foreach (var kv in EffectMeta.Params(effect))
                 {
                     var meta = kv.Value;
                     var label = meta.Label;
 
-                    var providedParam = GetChildDict(providedEffect, label);
-                    var providedText = ExtractText(providedParam);
+                    // ⬇️ change: fetch raw object instead of dict-cast
+                    object? providedParamObj = GetChildRaw(providedEffect, label);
+                    var providedText = ExtractText(providedParamObj);
 
                     var valueStr = !string.IsNullOrWhiteSpace(providedText)
                         ? providedText!
@@ -66,31 +63,29 @@ namespace LoopstationCompanionApi.Services
                     };
                 }
 
-                // Keep any extra/unknown params present in the payload
                 if (providedEffect is not null)
                 {
                     foreach (var kv in providedEffect)
                     {
                         if (!mergedParams.ContainsKey(kv.Key))
-                        {
                             mergedParams[kv.Key] = kv.Value;
-                        }
                     }
                 }
 
                 result[effect] = mergedParams;
             }
 
-            // Preserve any unknown effects that were present in the payload
             foreach (var kv in partial)
-            {
                 if (!result.ContainsKey(kv.Key))
-                {
                     result[kv.Key] = kv.Value;
-                }
-            }
 
             return result;
+        }
+
+        private static object? GetChildRaw(IDictionary<string, object>? dict, string key)
+        {
+            if (dict is null) return null;
+            return dict.TryGetValue(key, out var obj) ? obj : null;
         }
 
         // Cast an object to Dictionary<string, object> if possible
