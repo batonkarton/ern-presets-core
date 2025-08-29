@@ -41,7 +41,7 @@ namespace LoopstationCompanionApi.Services
 
             foreach (var effect in EffectMeta.EffectKeys())
             {
-                var providedEffect = GetChildDict(partial, effect); // keep this (effect block is IDictionary<string, object>)
+                var providedEffect = GetChildDict(partial, effect);
                 var mergedParams = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
                 foreach (var kv in EffectMeta.Params(effect))
@@ -49,7 +49,6 @@ namespace LoopstationCompanionApi.Services
                     var meta = kv.Value;
                     var label = meta.Label;
 
-                    // ⬇️ change: fetch raw object instead of dict-cast
                     object? providedParamObj = GetChildRaw(providedEffect, label);
                     var providedText = ExtractText(providedParamObj);
 
