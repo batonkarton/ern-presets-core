@@ -8,8 +8,8 @@ namespace LoopstationCompanionApi.Controllers
     [Route("api/[controller]")]
     public class PresetsController : ControllerBase
     {
-        private readonly IPresetService _service;
-        public PresetsController(IPresetService service) => _service = service;
+        private readonly IPresetService _presetService;
+        public PresetsController(IPresetService service) => _presetService = service;
 
         // GET /api/presets
         [HttpGet]
@@ -17,7 +17,7 @@ namespace LoopstationCompanionApi.Controllers
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 20)
         {
-            var items = await _service.GetAllAsync(page, pageSize);
+            var items = await _presetService.GetAllAsync(page, pageSize);
             return Ok(items);
         }
 
@@ -25,7 +25,7 @@ namespace LoopstationCompanionApi.Controllers
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<Preset>> GetById(Guid id)
         {
-            var item = await _service.GetByIdAsync(id);
+            var item = await _presetService.GetByIdAsync(id);
             return item is null ? NotFound() : Ok(item);
         }
 
@@ -36,7 +36,7 @@ namespace LoopstationCompanionApi.Controllers
             if (string.IsNullOrWhiteSpace(body.Name))
                 return BadRequest("Name is required.");
 
-            var created = await _service.CreateAsync(new Preset
+            var created = await _presetService.CreateAsync(new Preset
             {
                 Name = body.Name,
                 DeviceModel = body.DeviceModel
@@ -52,7 +52,7 @@ namespace LoopstationCompanionApi.Controllers
             if (string.IsNullOrWhiteSpace(body.Name))
                 return BadRequest("Name is required.");
 
-            var updated = await _service.UpdateAsync(id, new Preset
+            var updated = await _presetService.UpdateAsync(id, new Preset
             {
                 Name = body.Name,
                 DeviceModel = body.DeviceModel
@@ -65,7 +65,7 @@ namespace LoopstationCompanionApi.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var removed = await _service.DeleteAsync(id);
+            var removed = await _presetService.DeleteAsync(id);
             return removed ? NoContent() : NotFound();
         }
 
@@ -85,7 +85,7 @@ namespace LoopstationCompanionApi.Controllers
 
             try
             {
-                var updated = await _service.ImportRc0Async(id, request.File, ct);
+                var updated = await _presetService.ImportRc0Async(id, request.File, ct);
                 return updated is null ? NotFound() : Ok(updated);
             }
             catch (InvalidDataException ex)
