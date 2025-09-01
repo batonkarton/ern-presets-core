@@ -4,7 +4,16 @@
 
     public static class EffectMeta
     {
-        public static readonly IReadOnlyDictionary<string, IReadOnlyDictionary<string, ParamMeta>> Map
+        public static ParamMeta GetParamMeta(string effectKey, string paramKey)
+            => Map.TryGetValue(effectKey, out var dict) && dict.TryGetValue(paramKey, out var meta)
+                ? meta
+                : new ParamMeta(paramKey, 0, 127, 0);
+
+        public static IEnumerable<string> EffectKeys() => Map.Keys;
+        public static IEnumerable<KeyValuePair<string, ParamMeta>> Params(string effectKey)
+            => Map.TryGetValue(effectKey, out var dict) ? dict : Array.Empty<KeyValuePair<string, ParamMeta>>();
+
+        private static readonly IReadOnlyDictionary<string, IReadOnlyDictionary<string, ParamMeta>> Map
             = new Dictionary<string, IReadOnlyDictionary<string, ParamMeta>>(StringComparer.OrdinalIgnoreCase)
             {
                 ["AA_LPF"] = new Dictionary<string, ParamMeta>
@@ -827,14 +836,5 @@
                     ["G"] = new("E.Level", 0, 100, 50),
                 },
             };
-
-        public static ParamMeta GetParamMeta(string effectKey, string paramKey)
-            => Map.TryGetValue(effectKey, out var dict) && dict.TryGetValue(paramKey, out var meta)
-                ? meta
-                : new ParamMeta(paramKey, 0, 127, 0);
-
-        public static IEnumerable<string> EffectKeys() => Map.Keys;
-        public static IEnumerable<KeyValuePair<string, ParamMeta>> Params(string effectKey)
-            => Map.TryGetValue(effectKey, out var dict) ? dict : Array.Empty<KeyValuePair<string, ParamMeta>>();
     }
 }

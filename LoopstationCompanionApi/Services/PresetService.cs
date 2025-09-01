@@ -16,7 +16,8 @@ namespace LoopstationCompanionApi.Services
         }
         public async Task<IReadOnlyList<PresetSummary>> GetAllAsync(int page, int pageSize)
         {
-            var dtos = await _repo.GetAllAsync(page, pageSize);
+            var dtos = await _repo.GetAllSummariesAsync(page, pageSize);
+
             return dtos.Select(dto =>
             {
                 Enum.TryParse(dto.DeviceModel, ignoreCase: true, out DeviceModel model);
@@ -29,6 +30,7 @@ namespace LoopstationCompanionApi.Services
                 };
             }).ToList();
         }
+
         public async Task<Preset?> GetByIdAsync(Guid id)
         {
             var dto = await _repo.GetByIdAsync(id);
@@ -43,7 +45,7 @@ namespace LoopstationCompanionApi.Services
                 Name = preset.Name,
                 DeviceModel = preset.DeviceModel.ToString(),
                 UpdatedAt = DateTime.UtcNow,
-                PayloadJson = DefaultPayloadFactory.DefaultPayloadJson()
+                PayloadJson = DefaultPayloadFactory.GetDefaultPayloadJson()
             };
 
             var saved = await _repo.CreateAsync(dto);

@@ -28,7 +28,7 @@ namespace LoopstationCompanionApi.Services
 
             // Accept either: root == <database> OR a descendant <database>
             var rootName = doc.Root.Name.LocalName;
-            XElement? database = null;
+            XElement? database;
 
             if (string.Equals(rootName, XmlConstants.DatabaseTag, StringComparison.OrdinalIgnoreCase))
             {
