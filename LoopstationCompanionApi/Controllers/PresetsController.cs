@@ -75,12 +75,15 @@ namespace LoopstationCompanionApi.Controllers
         [Consumes("multipart/form-data")]
         public async Task<ActionResult<Preset>> ImportRc0(
             Guid id,
-            [FromForm] ImportRc0Request request,
+            [FromForm] ImportRc0Request? request,
             CancellationToken ct)
         {
-            if (request?.File is null)
+            if (request is null || request.File is null)
                 return BadRequest("File is required.");
-            if (!request.File.FileName.EndsWith(".rc0", StringComparison.OrdinalIgnoreCase))
+
+            var file = request.File;
+
+            if (!file.FileName.EndsWith(".rc0", StringComparison.OrdinalIgnoreCase))
                 return BadRequest("Only .rc0 files are supported.");
 
             try

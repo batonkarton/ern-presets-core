@@ -112,7 +112,6 @@ namespace LoopstationCompanionApi.Services
                     }
                 };
             }
-
             private static string ClampToRange(string raw, int min, int max)
             {
                 if (!int.TryParse(raw, out var n)) n = min;
