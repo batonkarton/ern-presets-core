@@ -81,7 +81,6 @@ namespace LoopstationCompanionApi.Repositories
             return updated;
         }
 
-
         public async Task<bool> DeleteAsync(Guid id)
         {
             var all = await LoadAllAsync();
@@ -89,6 +88,7 @@ namespace LoopstationCompanionApi.Repositories
             if (removed) await SaveAllAsync(all);
             return removed;
         }
+
         public async Task<PresetDto?> UpdatePayloadAsync(Guid id, string payloadJson, DateTime updatedAt)
         {
             var all = await LoadAllAsync();
