@@ -9,8 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{02EA681E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoopstationCompanionApi.UnitTests", "..\LoopstationCompanionApi.Tests\LoopstationCompanionApi.UnitTests.csproj", "{1DF1DB61-1759-4E87-A0B8-DD3A15F45BF4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoopstationCompanionApi.ApiTests", "..\LoopstationCompanionApi.ApiTests\LoopstationCompanionApi.ApiTests.csproj", "{74ABA29F-CAC6-4A99-86E8-11F1AF5A29FF}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,17 +23,12 @@ Global
 		{1DF1DB61-1759-4E87-A0B8-DD3A15F45BF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1DF1DB61-1759-4E87-A0B8-DD3A15F45BF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1DF1DB61-1759-4E87-A0B8-DD3A15F45BF4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{74ABA29F-CAC6-4A99-86E8-11F1AF5A29FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{74ABA29F-CAC6-4A99-86E8-11F1AF5A29FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{74ABA29F-CAC6-4A99-86E8-11F1AF5A29FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{74ABA29F-CAC6-4A99-86E8-11F1AF5A29FF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{1DF1DB61-1759-4E87-A0B8-DD3A15F45BF4} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{74ABA29F-CAC6-4A99-86E8-11F1AF5A29FF} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7443718F-7495-447B-98A0-1D43061B8460}

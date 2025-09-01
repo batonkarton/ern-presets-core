@@ -12,11 +12,9 @@ namespace LoopstationCompanionApi.UnitTests.Services
             var obj = DefaultPayloadFactory.DefaultPayloadObject();
             var json = JsonSerializer.Serialize(obj);
 
-            // sanity checks
             json.Should().Contain("\"database\"");
             json.Should().Contain("\"ifx\"");
 
-            // spot-check some common effects & labels
             json.Should().Contain("AA_LPF");
             json.Should().Contain("Rate");
             json.Should().Contain("\"_text\"");
