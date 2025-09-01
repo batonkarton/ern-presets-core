@@ -4,7 +4,10 @@ namespace LoopstationCompanionApi.Services
 {
     public static class DefaultPayloadFactory
     {
-        public static object DefaultPayloadObject()
+        public static string GetDefaultPayloadJson() =>
+            JsonSerializer.Serialize(BuildDefaultPayloadObject());
+
+        private static object BuildDefaultPayloadObject()
         {
             var ifx = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
@@ -26,9 +29,6 @@ namespace LoopstationCompanionApi.Services
 
             return new { database = new { ifx } };
         }
-
-        public static string DefaultPayloadJson() =>
-            JsonSerializer.Serialize(DefaultPayloadObject());
 
         /// <summary>
         /// Merge a partially built IFX dictionary (effect -> { label -> {"_text": "..."} })
@@ -82,23 +82,15 @@ namespace LoopstationCompanionApi.Services
         }
 
         private static object? GetChildRaw(IDictionary<string, object>? dict, string key)
-        {
-            if (dict is null) return null;
-            return dict.TryGetValue(key, out var obj) ? obj : null;
-        }
+            => dict is null ? null : (dict.TryGetValue(key, out var obj) ? obj : null);
 
-        // Cast an object to Dictionary<string, object> if possible
-        private static IDictionary<string, object>? AsDict(object? obj)
-            => obj as IDictionary<string, object>;
-
-        // Safely fetch a child dictionary by key from a parent dictionary
         private static IDictionary<string, object>? GetChildDict(
             IDictionary<string, object>? dict,
             string key)
-        {
-            if (dict is null) return null;
-            return dict.TryGetValue(key, out var obj) ? AsDict(obj) : null;
-        }
+            => dict is null ? null : (dict.TryGetValue(key, out var obj) ? AsDict(obj) : null);
+
+        private static IDictionary<string, object>? AsDict(object? obj)
+            => obj as IDictionary<string, object>;
 
         // Extract "_text" value from a param object that could be
         // Dictionary<string, object> OR Dictionary<string, string>
@@ -106,13 +98,11 @@ namespace LoopstationCompanionApi.Services
         {
             if (paramObj is IDictionary<string, object> d1)
             {
-                if (d1.TryGetValue("_text", out var v))
-                    return v?.ToString();
+                if (d1.TryGetValue("_text", out var v)) return v?.ToString();
             }
             else if (paramObj is IDictionary<string, string> d2)
             {
-                if (d2.TryGetValue("_text", out var v))
-                    return v;
+                if (d2.TryGetValue("_text", out var v)) return v;
             }
             return null;
         }

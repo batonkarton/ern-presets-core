@@ -45,7 +45,7 @@ namespace LoopstationCompanionApi.Services
                 Name = preset.Name,
                 DeviceModel = preset.DeviceModel.ToString(),
                 UpdatedAt = DateTime.UtcNow,
-                PayloadJson = DefaultPayloadFactory.DefaultPayloadJson()
+                PayloadJson = DefaultPayloadFactory.GetDefaultPayloadJson()
             };
 
             var saved = await _repo.CreateAsync(dto);
