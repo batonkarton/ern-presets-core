@@ -1,6 +1,5 @@
 ﻿using FluentAssertions;
 using LoopstationCompanionApi.Services;
-using System.Text.Json;
 
 namespace LoopstationCompanionApi.UnitTests.Services
 {
@@ -9,8 +8,7 @@ namespace LoopstationCompanionApi.UnitTests.Services
         [Fact]
         public void DefaultPayloadObject_Returns_All_Effects_With_Default_Param_Texts()
         {
-            var obj = DefaultPayloadFactory.DefaultPayloadObject();
-            var json = JsonSerializer.Serialize(obj);
+            var json = DefaultPayloadFactory.GetDefaultPayloadJson();
 
             json.Should().Contain("\"database\"");
             json.Should().Contain("\"ifx\"");
