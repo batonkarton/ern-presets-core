@@ -1,5 +1,5 @@
 ﻿using FluentAssertions;
-using LoopstationCompanionApi.Services;
+using LoopstationCompanionApi.Utils;
 
 namespace LoopstationCompanionApi.Tests.Utils
 {
