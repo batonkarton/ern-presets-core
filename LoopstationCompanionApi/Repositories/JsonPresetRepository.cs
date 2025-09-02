@@ -80,7 +80,6 @@ namespace LoopstationCompanionApi.Repositories
             await SaveAllAsync(all);
             return updated;
         }
-
         public async Task<bool> DeleteAsync(Guid id)
         {
             var all = await LoadAllAsync();
@@ -88,6 +87,15 @@ namespace LoopstationCompanionApi.Repositories
             if (removed) await SaveAllAsync(all);
             return removed;
         }
+        public async Task<PresetDto?> UpdatePayloadAsync(Guid id, string payloadJson, DateTime updatedAt)
+        {
+            var all = await LoadAllAsync();
+            var idx = all.FindIndex(p => p.Id == id);
+            if (idx < 0) return null;
+
+            var updated = all[idx];
+            updated.PayloadJson = payloadJson;
+            updated.UpdatedAt = updatedAt == default ? DateTime.UtcNow : updatedAt;
 
         public async Task<PresetDto?> UpdatePayloadAsync(Guid id, string payloadJson, DateTime updatedAt)
         {
