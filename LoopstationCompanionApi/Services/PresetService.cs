@@ -57,13 +57,19 @@ namespace LoopstationCompanionApi.Services
             var existing = await _repo.GetByIdAsync(id);
             if (existing is null) return null;
 
-            existing.Name = preset.Name;
-            existing.DeviceModel = preset.DeviceModel.ToString();
-            existing.UpdatedAt = DateTime.UtcNow;
+            var dto = new PresetDto
+            {
+                Id = id,
+                Name = preset.Name,
+                DeviceModel = preset.DeviceModel.ToString(),
+                UpdatedAt = DateTime.UtcNow,
+                PayloadJson = existing.PayloadJson
+            };
 
-            var saved = await _repo.UpdateAsync(id, existing);
+            var saved = await _repo.UpdateAsync(id, dto);
             return saved is null ? null : MapToModel(saved);
         }
+
 
         public Task<bool> DeleteAsync(Guid id) => _repo.DeleteAsync(id);
 

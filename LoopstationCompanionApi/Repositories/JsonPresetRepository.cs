@@ -64,8 +64,8 @@ namespace LoopstationCompanionApi.Repositories
         public async Task<PresetDto?> UpdateAsync(Guid id, PresetDto dto)
         {
             var all = await LoadAllAsync();
-            var idx = all.FirstOrDefault(p => p.Id == id);
-            if (idx is null) return null;
+            var index = all.FindIndex(p => p.Id == id);
+            if (index < 0) return null;
 
             var updated = new PresetDto
             {
@@ -73,13 +73,14 @@ namespace LoopstationCompanionApi.Repositories
                 Name = dto.Name,
                 DeviceModel = dto.DeviceModel,
                 UpdatedAt = dto.UpdatedAt == default ? DateTime.UtcNow : dto.UpdatedAt,
-                PayloadJson = dto.PayloadJson ?? idx.PayloadJson
+                PayloadJson = dto.PayloadJson ?? all[index].PayloadJson
             };
 
-            idx = updated;
+            all[index] = updated;
             await SaveAllAsync(all);
             return updated;
         }
+
         public async Task<bool> DeleteAsync(Guid id)
         {
             var all = await LoadAllAsync();
