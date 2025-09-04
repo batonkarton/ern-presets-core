@@ -12,6 +12,7 @@ namespace LoopstationCompanionApi.Services
         public class Rc0Importer : IRc0Importer
         {
             private readonly IRc0Validator _validator;
+            private static readonly TimeSpan RegexTimeout = TimeSpan.FromSeconds(2);
             public Rc0Importer(IRc0Validator validator) => _validator = validator;
 
             public async Task<string> ImportAndSanitizeAsync(IFormFile file, CancellationToken ct = default)
@@ -37,28 +38,52 @@ namespace LoopstationCompanionApi.Services
                 var payload = BuildSanitizedPayload(cleaned);
                 return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = false });
             }
+
             private static string CleanXmlContent(string xml)
             {
+                if (string.IsNullOrEmpty(xml)) return string.Empty;
+
                 // numeric tags
-                var cleaned = Regex.Replace(xml, XmlRegexPatterns.OpenNumericTag, XmlRegexPatterns.OpenNumericReplacement);
-                cleaned = Regex.Replace(cleaned, XmlRegexPatterns.CloseNumericTag, XmlRegexPatterns.CloseNumericReplacement);
+                var cleaned = Regex.Replace(
+                    xml,
+                    XmlRegexPatterns.OpenNumericTag,
+                    XmlRegexPatterns.OpenNumericReplacement,
+                    RegexOptions.None,
+                    RegexTimeout);
+
+                cleaned = Regex.Replace(
+                    cleaned,
+                    XmlRegexPatterns.CloseNumericTag,
+                    XmlRegexPatterns.CloseNumericReplacement,
+                    RegexOptions.None,
+                    RegexTimeout);
 
                 // symbol tags
                 cleaned = Regex.Replace(
                     cleaned,
                     XmlRegexPatterns.OpenSymbolTag,
-                    m => string.Format(XmlRegexPatterns.OpenSymbolReplacement, SymbolToName(m.Groups[1].Value)));
+                    m => string.Format(XmlRegexPatterns.OpenSymbolReplacement, SymbolToName(m.Groups[1].Value)),
+                    RegexOptions.None,
+                    RegexTimeout);
 
                 cleaned = Regex.Replace(
                     cleaned,
                     XmlRegexPatterns.CloseSymbolTag,
-                    m => string.Format(XmlRegexPatterns.CloseSymbolReplacement, SymbolToName(m.Groups[1].Value)));
+                    m => string.Format(XmlRegexPatterns.CloseSymbolReplacement, SymbolToName(m.Groups[1].Value)),
+                    RegexOptions.None,
+                    RegexTimeout);
 
                 // drop <count>...</count>
-                cleaned = Regex.Replace(cleaned, XmlRegexPatterns.CountTagPattern, "", RegexOptions.Singleline);
+                cleaned = Regex.Replace(
+                    cleaned,
+                    XmlRegexPatterns.CountTagPattern,
+                    string.Empty,
+                    RegexOptions.Singleline,
+                    RegexTimeout);
 
                 return cleaned.Trim();
             }
+
 
             private static string SymbolToName(string symbol) => symbol switch
             {
