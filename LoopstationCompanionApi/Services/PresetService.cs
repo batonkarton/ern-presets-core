@@ -5,15 +5,11 @@ using System.Text.Json;
 
 namespace LoopstationCompanionApi.Services
 {
-    public class PresetService : IPresetService
+    public class PresetService(IPresetRepository repo, IRc0Importer importer) : IPresetService
     {
-        private readonly IPresetRepository _repo;
-        private readonly IRc0Importer _importer;
-        public PresetService(IPresetRepository repo, IRc0Importer importer)
-        {
-            _repo = repo;
-            _importer = importer;
-        }
+        private readonly IPresetRepository _repo = repo;
+        private readonly IRc0Importer _importer = importer;
+
         public async Task<IReadOnlyList<PresetSummary>> GetAllAsync(int page, int pageSize)
         {
             var dtos = await _repo.GetAllSummariesAsync(page, pageSize);

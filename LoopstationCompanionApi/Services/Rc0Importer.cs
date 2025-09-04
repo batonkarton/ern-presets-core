@@ -9,15 +9,14 @@ namespace LoopstationCompanionApi.Services
 {
     namespace LoopstationCompanionApi.Services
     {
-        public class Rc0Importer : IRc0Importer
+        public class Rc0Importer(IRc0Validator validator) : IRc0Importer
         {
-            private readonly IRc0Validator _validator;
+            private readonly IRc0Validator _validator = validator;
             private static readonly TimeSpan RegexTimeout = TimeSpan.FromSeconds(2);
-            public Rc0Importer(IRc0Validator validator) => _validator = validator;
 
             public async Task<string> ImportAndSanitizeAsync(IFormFile file, CancellationToken ct = default)
             {
-                if (file is null) throw new ArgumentNullException(nameof(file));
+                ArgumentNullException.ThrowIfNull(file);
                 if (file.Length == 0) throw new InvalidDataException("Uploaded file is empty.");
 
                 using var stream = file.OpenReadStream();
@@ -103,22 +102,17 @@ namespace LoopstationCompanionApi.Services
 
                 // Find <database>
                 var database =
-                    string.Equals(xdoc.Root.Name.LocalName, XmlConstants.DatabaseTag, StringComparison.OrdinalIgnoreCase)
+                    (string.Equals(xdoc.Root.Name.LocalName, XmlConstants.DatabaseTag, StringComparison.OrdinalIgnoreCase)
                         ? xdoc.Root
                         : xdoc.Root.Element(XmlConstants.DatabaseTag)
                           ?? xdoc.Root.Elements().FirstOrDefault(e =>
-                               string.Equals(e.Name.LocalName, XmlConstants.DatabaseTag, StringComparison.OrdinalIgnoreCase));
-
-                if (database is null) throw new InvalidDataException($"Missing <{XmlConstants.DatabaseTag}>.");
+                               string.Equals(e.Name.LocalName, XmlConstants.DatabaseTag, StringComparison.OrdinalIgnoreCase))) ?? throw new InvalidDataException($"Missing <{XmlConstants.DatabaseTag}>.");
 
                 // Find <ifx> under <database>
                 var ifx =
-                    database.Element(XmlConstants.IfxTag)
+                    (database.Element(XmlConstants.IfxTag)
                     ?? database.Elements().FirstOrDefault(e =>
-                           string.Equals(e.Name.LocalName, XmlConstants.IfxTag, StringComparison.OrdinalIgnoreCase));
-
-                if (ifx is null) throw new InvalidDataException($"Missing <{XmlConstants.IfxTag}>.");
-
+                           string.Equals(e.Name.LocalName, XmlConstants.IfxTag, StringComparison.OrdinalIgnoreCase))) ?? throw new InvalidDataException($"Missing <{XmlConstants.IfxTag}>.");
                 var effects = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
                 foreach (var eff in ifx.Elements())
