@@ -1,4 +1,4 @@
-﻿namespace LoopstationCompanionApi.UnitTests.Helpers;
+﻿namespace LoopstationCompanionApi.Tests.Helpers;
 
 public static class DictBuilders
 {

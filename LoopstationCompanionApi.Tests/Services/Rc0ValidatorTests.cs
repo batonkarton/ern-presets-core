@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 using LoopstationCompanionApi.Services;
-using LoopstationCompanionApi.UnitTests.Helpers;
+using LoopstationCompanionApi.Tests.Helpers;
 
 public class Rc0ValidatorTests
 {

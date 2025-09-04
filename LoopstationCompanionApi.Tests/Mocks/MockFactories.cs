@@ -2,7 +2,7 @@
 using LoopstationCompanionApi.Services;
 using Moq;
 
-namespace LoopstationCompanionApi.UnitTests.Helpers;
+namespace LoopstationCompanionApi.Tests.Mocks;
 
 public static class MockFactories
 {

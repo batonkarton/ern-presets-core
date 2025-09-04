@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 
-namespace LoopstationCompanionApi.UnitTests.Helpers;
+namespace LoopstationCompanionApi.Tests.Helpers;
 
 public sealed class TempHostEnvironment : IHostEnvironment, IDisposable
 {

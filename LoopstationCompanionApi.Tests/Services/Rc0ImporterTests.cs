@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 using LoopstationCompanionApi.Services.LoopstationCompanionApi.Services;
-using LoopstationCompanionApi.UnitTests.Helpers;
-using LoopstationCompanionApi.UnitTests.TestHelpers;
+using LoopstationCompanionApi.Tests.Helpers;
+using LoopstationCompanionApi.Tests.Mocks;
 using System.Text.Json;
 
 public class Rc0ImporterTests

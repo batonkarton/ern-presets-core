@@ -1,8 +1,8 @@
 ﻿using FluentAssertions;
 using LoopstationCompanionApi.Services;
-using LoopstationCompanionApi.UnitTests.Helpers;
+using LoopstationCompanionApi.Tests.Helpers;
 
-namespace LoopstationCompanionApi.UnitTests.Services;
+namespace LoopstationCompanionApi.Tests.Services;
 
 public class EffectMetaTests
 {

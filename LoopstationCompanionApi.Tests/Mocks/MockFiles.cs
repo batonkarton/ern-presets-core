@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System.Text;
 
-namespace LoopstationCompanionApi.UnitTests.TestHelpers
+namespace LoopstationCompanionApi.Tests.Mocks
 {
     public static class MockFiles
     {

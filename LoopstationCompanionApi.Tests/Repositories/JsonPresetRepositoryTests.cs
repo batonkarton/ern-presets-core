@@ -1,9 +1,9 @@
 ﻿using FluentAssertions;
 using LoopstationCompanionApi.Dtos;
 using LoopstationCompanionApi.Repositories;
-using LoopstationCompanionApi.UnitTests.Helpers;
+using LoopstationCompanionApi.Tests.Helpers;
 
-namespace LoopstationCompanionApi.UnitTests.Repositories;
+namespace LoopstationCompanionApi.Tests.Repositories;
 
 public class JsonPresetRepositoryTests : IDisposable
 {

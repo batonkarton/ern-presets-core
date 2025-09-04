@@ -1,7 +1,7 @@
 ﻿using LoopstationCompanionApi.Services;
 using Moq;
 
-namespace LoopstationCompanionApi.UnitTests.Helpers;
+namespace LoopstationCompanionApi.Tests.Helpers;
 
 public static class Validators
 {

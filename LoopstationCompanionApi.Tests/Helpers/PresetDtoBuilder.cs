@@ -1,6 +1,6 @@
 ﻿using LoopstationCompanionApi.Dtos;
 
-namespace LoopstationCompanionApi.UnitTests.Helpers;
+namespace LoopstationCompanionApi.Tests.Helpers;
 
 public sealed class PresetDtoBuilder
 {

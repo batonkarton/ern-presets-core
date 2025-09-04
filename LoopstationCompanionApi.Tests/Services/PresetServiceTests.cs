@@ -3,13 +3,13 @@ using LoopstationCompanionApi.Dtos;
 using LoopstationCompanionApi.Models;
 using LoopstationCompanionApi.Repositories;
 using LoopstationCompanionApi.Services;
-using LoopstationCompanionApi.UnitTests.Helpers;
-using LoopstationCompanionApi.UnitTests.TestHelpers;
+using LoopstationCompanionApi.Tests.Helpers;
+using LoopstationCompanionApi.Tests.Mocks;
 using Microsoft.AspNetCore.Http;
 using Moq;
 using System.Text.Json;
 
-namespace LoopstationCompanionApi.UnitTests.Services;
+namespace LoopstationCompanionApi.Tests.Services;
 
 public class PresetServiceTests
 {
