@@ -5,15 +5,11 @@ using System.Text.Json;
 
 namespace LoopstationCompanionApi.Services
 {
-    public class PresetService : IPresetService
+    public class PresetService(IPresetRepository repo, IRc0Importer importer) : IPresetService
     {
-        private readonly IPresetRepository _repo;
-        private readonly IRc0Importer _importer;
-        public PresetService(IPresetRepository repo, IRc0Importer importer)
-        {
-            _repo = repo;
-            _importer = importer;
-        }
+        private readonly IPresetRepository _repo = repo;
+        private readonly IRc0Importer _importer = importer;
+
         public async Task<IReadOnlyList<PresetSummary>> GetAllAsync(int page, int pageSize)
         {
             var dtos = await _repo.GetAllSummariesAsync(page, pageSize);
@@ -57,13 +53,19 @@ namespace LoopstationCompanionApi.Services
             var existing = await _repo.GetByIdAsync(id);
             if (existing is null) return null;
 
-            existing.Name = preset.Name;
-            existing.DeviceModel = preset.DeviceModel.ToString();
-            existing.UpdatedAt = DateTime.UtcNow;
+            var dto = new PresetDto
+            {
+                Id = id,
+                Name = preset.Name,
+                DeviceModel = preset.DeviceModel.ToString(),
+                UpdatedAt = DateTime.UtcNow,
+                PayloadJson = existing.PayloadJson
+            };
 
-            var saved = await _repo.UpdateAsync(id, existing);
+            var saved = await _repo.UpdateAsync(id, dto);
             return saved is null ? null : MapToModel(saved);
         }
+
 
         public Task<bool> DeleteAsync(Guid id) => _repo.DeleteAsync(id);
 

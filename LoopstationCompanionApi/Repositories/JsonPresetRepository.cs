@@ -55,15 +55,17 @@ namespace LoopstationCompanionApi.Repositories
                 UpdatedAt = dto.UpdatedAt == default ? DateTime.UtcNow : dto.UpdatedAt,
                 PayloadJson = dto.PayloadJson
             };
+
             all.Add(toSave);
             await SaveAllAsync(all);
+
             return toSave;
         }
         public async Task<PresetDto?> UpdateAsync(Guid id, PresetDto dto)
         {
             var all = await LoadAllAsync();
-            var idx = all.FindIndex(p => p.Id == id);
-            if (idx < 0) return null;
+            var index = all.FindIndex(p => p.Id == id);
+            if (index < 0) return null;
 
             var updated = new PresetDto
             {
@@ -71,12 +73,14 @@ namespace LoopstationCompanionApi.Repositories
                 Name = dto.Name,
                 DeviceModel = dto.DeviceModel,
                 UpdatedAt = dto.UpdatedAt == default ? DateTime.UtcNow : dto.UpdatedAt,
-                PayloadJson = dto.PayloadJson ?? all[idx].PayloadJson
+                PayloadJson = dto.PayloadJson ?? all[index].PayloadJson
             };
-            all[idx] = updated;
+
+            all[index] = updated;
             await SaveAllAsync(all);
             return updated;
         }
+
         public async Task<bool> DeleteAsync(Guid id)
         {
             var all = await LoadAllAsync();
@@ -84,6 +88,7 @@ namespace LoopstationCompanionApi.Repositories
             if (removed) await SaveAllAsync(all);
             return removed;
         }
+
         public async Task<PresetDto?> UpdatePayloadAsync(Guid id, string payloadJson, DateTime updatedAt)
         {
             var all = await LoadAllAsync();
@@ -96,8 +101,10 @@ namespace LoopstationCompanionApi.Repositories
 
             all[idx] = updated;
             await SaveAllAsync(all);
+
             return updated;
         }
+
         private Task<List<PresetDto>> LoadAllAsync()
         {
             lock (_gate)

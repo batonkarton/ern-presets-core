@@ -1,4 +1,5 @@
 ﻿using LoopstationCompanionApi.Constants;
+using LoopstationCompanionApi.Utils;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -8,14 +9,14 @@ namespace LoopstationCompanionApi.Services
 {
     namespace LoopstationCompanionApi.Services
     {
-        public class Rc0Importer : IRc0Importer
+        public class Rc0Importer(IRc0Validator validator) : IRc0Importer
         {
-            private readonly IRc0Validator _validator;
-            public Rc0Importer(IRc0Validator validator) => _validator = validator;
+            private readonly IRc0Validator _validator = validator;
+            private static readonly TimeSpan RegexTimeout = TimeSpan.FromSeconds(2);
 
             public async Task<string> ImportAndSanitizeAsync(IFormFile file, CancellationToken ct = default)
             {
-                if (file is null) throw new ArgumentNullException(nameof(file));
+                ArgumentNullException.ThrowIfNull(file);
                 if (file.Length == 0) throw new InvalidDataException("Uploaded file is empty.");
 
                 using var stream = file.OpenReadStream();
@@ -36,28 +37,52 @@ namespace LoopstationCompanionApi.Services
                 var payload = BuildSanitizedPayload(cleaned);
                 return JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = false });
             }
+
             private static string CleanXmlContent(string xml)
             {
+                if (string.IsNullOrEmpty(xml)) return string.Empty;
+
                 // numeric tags
-                var cleaned = Regex.Replace(xml, XmlRegexPatterns.OpenNumericTag, XmlRegexPatterns.OpenNumericReplacement);
-                cleaned = Regex.Replace(cleaned, XmlRegexPatterns.CloseNumericTag, XmlRegexPatterns.CloseNumericReplacement);
+                var cleaned = Regex.Replace(
+                    xml,
+                    XmlRegexPatterns.OpenNumericTag,
+                    XmlRegexPatterns.OpenNumericReplacement,
+                    RegexOptions.None,
+                    RegexTimeout);
+
+                cleaned = Regex.Replace(
+                    cleaned,
+                    XmlRegexPatterns.CloseNumericTag,
+                    XmlRegexPatterns.CloseNumericReplacement,
+                    RegexOptions.None,
+                    RegexTimeout);
 
                 // symbol tags
                 cleaned = Regex.Replace(
                     cleaned,
                     XmlRegexPatterns.OpenSymbolTag,
-                    m => string.Format(XmlRegexPatterns.OpenSymbolReplacement, SymbolToName(m.Groups[1].Value)));
+                    m => string.Format(XmlRegexPatterns.OpenSymbolReplacement, SymbolToName(m.Groups[1].Value)),
+                    RegexOptions.None,
+                    RegexTimeout);
 
                 cleaned = Regex.Replace(
                     cleaned,
                     XmlRegexPatterns.CloseSymbolTag,
-                    m => string.Format(XmlRegexPatterns.CloseSymbolReplacement, SymbolToName(m.Groups[1].Value)));
+                    m => string.Format(XmlRegexPatterns.CloseSymbolReplacement, SymbolToName(m.Groups[1].Value)),
+                    RegexOptions.None,
+                    RegexTimeout);
 
                 // drop <count>...</count>
-                cleaned = Regex.Replace(cleaned, XmlRegexPatterns.CountTagPattern, "", RegexOptions.Singleline);
+                cleaned = Regex.Replace(
+                    cleaned,
+                    XmlRegexPatterns.CountTagPattern,
+                    string.Empty,
+                    RegexOptions.Singleline,
+                    RegexTimeout);
 
                 return cleaned.Trim();
             }
+
 
             private static string SymbolToName(string symbol) => symbol switch
             {
@@ -77,22 +102,17 @@ namespace LoopstationCompanionApi.Services
 
                 // Find <database>
                 var database =
-                    string.Equals(xdoc.Root.Name.LocalName, XmlConstants.DatabaseTag, StringComparison.OrdinalIgnoreCase)
+                    (string.Equals(xdoc.Root.Name.LocalName, XmlConstants.DatabaseTag, StringComparison.OrdinalIgnoreCase)
                         ? xdoc.Root
                         : xdoc.Root.Element(XmlConstants.DatabaseTag)
                           ?? xdoc.Root.Elements().FirstOrDefault(e =>
-                               string.Equals(e.Name.LocalName, XmlConstants.DatabaseTag, StringComparison.OrdinalIgnoreCase));
-
-                if (database is null) throw new InvalidDataException($"Missing <{XmlConstants.DatabaseTag}>.");
+                               string.Equals(e.Name.LocalName, XmlConstants.DatabaseTag, StringComparison.OrdinalIgnoreCase))) ?? throw new InvalidDataException($"Missing <{XmlConstants.DatabaseTag}>.");
 
                 // Find <ifx> under <database>
                 var ifx =
-                    database.Element(XmlConstants.IfxTag)
+                    (database.Element(XmlConstants.IfxTag)
                     ?? database.Elements().FirstOrDefault(e =>
-                           string.Equals(e.Name.LocalName, XmlConstants.IfxTag, StringComparison.OrdinalIgnoreCase));
-
-                if (ifx is null) throw new InvalidDataException($"Missing <{XmlConstants.IfxTag}>.");
-
+                           string.Equals(e.Name.LocalName, XmlConstants.IfxTag, StringComparison.OrdinalIgnoreCase))) ?? throw new InvalidDataException($"Missing <{XmlConstants.IfxTag}>.");
                 var effects = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
                 foreach (var eff in ifx.Elements())

@@ -1,4 +1,4 @@
-﻿namespace LoopstationCompanionApi.Services
+﻿namespace LoopstationCompanionApi.Utils
 {
     public static class ErrorUtils
     {
