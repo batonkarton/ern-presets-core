@@ -13,22 +13,54 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Install tools
-      run: |
-        dotnet tool install --global dotnet-coverage
-        echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-    - name: SonarQube Scan
-      uses: SonarSource/sonarqube-scan-action@v5.3.1
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
-        SONAR_ORGANIZATION: ${{ secrets.SONAR_ORG }}
-    - name: Build Solution
+    - name: Build Solution and Run Tests
       id: build
-      run: dotnet build --configuration Release
-    - name: Run Unit tests and collect code coverage
-      id: test
-      run: dotnet-coverage collect "dotnet test --configuration Release" -f xml -o coverage.xml
+      run: dotnet test --configuration Release --verbosity normal --logger trx --collect:"XPlat Code Coverage"
+    - name: Combine Coverage Reports
+      uses: danielpalme/ReportGenerator-GitHub-Action@v5.4.12
+      with:
+          reports: "**/*.cobertura.xml"
+          targetdir: "${{ github.workspace }}"
+          reporttypes: "Cobertura"
+          verbosity: "Info"
+          title: "Code Coverage"
+          toolpath: "reportgeneratortool"
+    - name: Upload Combined Coverage XML
+      uses: actions/upload-artifact@v4
+      with:
+          name: coverage
+          path: ${{ github.workspace }}/Cobertura.xml
+          retention-days: 5
+    - name: Publish Code Coverage Report
+      uses: irongut/CodeCoverageSummary@v1.3.0
+      with:
+          filename: "Cobertura.xml"
+          badge: true
+          fail_below_min: false # just informative for now
+          format: markdown
+          hide_branch_rate: false
+          hide_complexity: false
+          indicators: true
+          output: both
+          thresholds: "10 30"
+    - name: Add Coverage PR Comment
+      uses: marocchino/sticky-pull-request-comment@v2
+      if: github.event_name == 'pull_request'
+      with:
+          recreate: true
+          path: code-coverage-results.md
+    - name: Upload Test Result Files
+      uses: actions/upload-artifact@v4
+      with:
+          name: test-results
+          path: ${{ github.workspace }}/**/TestResults/**/*
+          retention-days: 5
+          
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v2.20.0
+      if: always()
+      with:
+          trx_files: "${{ github.workspace }}/**/*.trx"
 
     - name: Delete previous comments
       uses: actions/github-script@v6
@@ -40,9 +72,13 @@ jobs:
             repo: context.repo.repo,
           });
 
-          const botComments = comments.data.filter(comment => comment.user.login === 'github-actions[bot]');
+          const validationComments = comments.data.filter(comment => 
+            comment.user.login === 'github-actions[bot]' && 
+            (comment.body.includes('🚨 The PR title or description is invalid') || 
+             comment.body.includes('✅ PR title and description are valid'))
+          );
 
-          for (const comment of botComments) {
+          for (const comment of validationComments) {
             await github.rest.issues.deleteComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
