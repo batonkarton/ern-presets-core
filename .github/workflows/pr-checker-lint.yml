@@ -19,11 +19,11 @@ jobs:
         dotnet tool install --global dotnet-coverage
         echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
     - name: SonarCloud Begin
-      run: dotnet-sonarscanner begin \
-              /k="${{ secrets.SONAR_PROJECT_KEY }}" \
-              /o="${{ secrets.SONAR_ORG }}" \
-              /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
-              /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
+      run: dotnet sonarscanner begin \
+          /k:"${{ secrets.SONAR_PROJECT_KEY }}" \
+          /o:"${{ secrets.SONAR_ORG }}" \
+          /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
+          /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
     - name: Build Solution
       id: build
       run: dotnet build --configuration Release
@@ -31,7 +31,7 @@ jobs:
       id: test
       run: dotnet-coverage collect "dotnet test --configuration Release" -f xml -o coverage.xml
     - name: SonarCloud End
-      run: dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+      run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
     - name: Delete previous comments
       uses: actions/github-script@v6
