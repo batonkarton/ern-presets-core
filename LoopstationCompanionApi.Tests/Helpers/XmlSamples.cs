@@ -2,7 +2,6 @@
 
 public static class XmlSamples
 {
-
     public const string ValidDatabaseWithIfxAndParams = """
     <database>
       <mem id="12"></mem>

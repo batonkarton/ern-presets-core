@@ -26,17 +26,20 @@ public class JsonPresetRepositoryTests : IDisposable
     [Fact]
     public async Task Create_And_GetById_Work()
     {
+        const string presetName = "Created";
+        const string payload = "{\"x\":1}";
+
         var dto = new PresetDtoBuilder()
-            .WithName("Created")
-            .WithPayload("{\"x\":1}")
+            .WithName(presetName)
+            .WithPayload(payload)
             .Build();
 
         var saved = await _repo.CreateAsync(dto);
 
         var reloaded = await _repo.GetByIdAsync(saved.Id);
         reloaded.Should().NotBeNull();
-        reloaded!.Name.Should().Be("Created");
-        reloaded.PayloadJson.Should().Be("{\"x\":1}");
+        reloaded!.Name.Should().Be(presetName);
+        reloaded.PayloadJson.Should().Be(payload);
     }
 
     [Fact]
@@ -55,43 +58,52 @@ public class JsonPresetRepositoryTests : IDisposable
     [Fact]
     public async Task UpdateAsync_Replaces_Item_In_List()
     {
+        const string beforeName = "Before";
+        const string afterName = "After";
+        const string payloadBefore = "{\"a\":1}";
+
         var created = await _repo.CreateAsync(new PresetDtoBuilder()
-            .WithName("Before")
-            .WithPayload("{\"a\":1}")
+            .WithName(beforeName)
+            .WithPayload(payloadBefore)
             .Build());
 
         var updated = await _repo.UpdateAsync(created.Id, new PresetDto
         {
-            Name = "After",
-            DeviceModel = "RC-505mkI",
-            PayloadJson = null // preserve existing payload
+            Name = afterName,
+            DeviceModel = TestConstants.Devices.RC505mkI_Hyphen,
+            PayloadJson = null
         });
 
         updated.Should().NotBeNull();
-        updated!.Name.Should().Be("After");
-        updated.DeviceModel.Should().Be("RC-505mkI");
-        updated.PayloadJson.Should().Be("{\"a\":1}");
+        updated!.Name.Should().Be(afterName);
+        updated.DeviceModel.Should().Be(TestConstants.Devices.RC505mkI_Hyphen);
+        updated.PayloadJson.Should().Be(payloadBefore);
 
         var reloaded = await _repo.GetByIdAsync(created.Id);
         reloaded.Should().NotBeNull();
-        reloaded!.Name.Should().Be("After");
+        reloaded!.Name.Should().Be(afterName);
     }
+
 
     [Fact]
     public async Task UpdatePayloadAsync_Updates_Payload_And_UpdatedAt()
     {
-        var created = await _repo.CreateAsync(new PresetDtoBuilder().WithName("PL").Build());
+        const string presetName = "PL";
+        const string updatedPayload = "{\"k\":2}";
+
+        var created = await _repo.CreateAsync(new PresetDtoBuilder().WithName(presetName).Build());
 
         var now = DateTime.UtcNow;
-        var updated = await _repo.UpdatePayloadAsync(created.Id, "{\"k\":2}", now);
+        var updated = await _repo.UpdatePayloadAsync(created.Id, updatedPayload, now);
 
         updated.Should().NotBeNull();
-        updated!.PayloadJson.Should().Be("{\"k\":2}");
+        updated!.PayloadJson.Should().Be(updatedPayload);
         updated.UpdatedAt.Should().BeCloseTo(now, TimeSpan.FromSeconds(1));
 
         var reloaded = await _repo.GetByIdAsync(created.Id);
-        reloaded!.PayloadJson.Should().Be("{\"k\":2}");
+        reloaded!.PayloadJson.Should().Be(updatedPayload);
     }
+
 
     [Fact]
     public async Task DeleteAsync_Removes_Item()

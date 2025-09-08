@@ -5,7 +5,10 @@ namespace LoopstationCompanionApi.Tests.Mocks;
 
 public static class MockFiles
 {
-    public static IFormFile FromString(string fileName, string content, string contentType = "application/octet-stream")
+    public static IFormFile CreateFromString(
+        string fileName,
+        string content,
+        string contentType = "application/octet-stream")
     {
         var bytes = Encoding.UTF8.GetBytes(content);
         var stream = new MemoryStream(bytes);

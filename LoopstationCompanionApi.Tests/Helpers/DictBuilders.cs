@@ -2,13 +2,19 @@
 
 public static class DictBuilders
 {
-    // Makes: { effect -> { label -> {"_text": value} } }
-    public static IDictionary<string, object> PartialEffect(string effect, params (string label, string value)[] pairs)
+    // Builds: { effect -> { label -> { "_text": value } } }
+    public static IDictionary<string, object> BuildPartialEffect(
+        string effect,
+        params (string label, string value)[] pairs)
     {
         var paramDict = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
         foreach (var (label, value) in pairs)
         {
-            paramDict[label] = new Dictionary<string, string> { ["_text"] = value };
+            paramDict[label] = new Dictionary<string, string>
+            {
+                [TestConstants.JsonKeys.Text] = value
+            };
         }
 
         return new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
@@ -17,13 +23,20 @@ public static class DictBuilders
         };
     }
 
-    public static IDictionary<string, object> UnknownEffect(string effect, string paramLabel, string value)
+    // Builds: { effect -> { paramLabel -> { "_text": value } } }
+    public static IDictionary<string, object> BuildUnknownEffect(
+        string effect,
+        string paramLabel,
+        string value)
     {
         return new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
         {
             [effect] = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
             {
-                [paramLabel] = new Dictionary<string, string> { ["_text"] = value }
+                [paramLabel] = new Dictionary<string, string>
+                {
+                    [TestConstants.JsonKeys.Text] = value
+                }
             }
         };
     }

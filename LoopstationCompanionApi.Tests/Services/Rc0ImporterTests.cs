@@ -9,73 +9,89 @@ public class Rc0ImporterTests
     [Fact]
     public async Task ImportAndSanitizeAsync_Returns_Normalized_Json_On_Valid_Input()
     {
-        var validator = Validators.AlwaysOk();
+        const string inputFileName = "preset.rc0";
+
+        var validator = MockFactories.CreateValidatorThatAlwaysSucceeds();
         var sut = new Rc0Importer(validator.Object);
 
-        var file = MockFiles.FromString("preset.rc0", XmlSamples.ValidImporterAA_LPF);
+        var file = MockFiles.CreateFromString(inputFileName, XmlSamples.ValidImporterAA_LPF);
 
-        var json = await sut.ImportAndSanitizeAsync(file);
+        var resultJson = await sut.ImportAndSanitizeAsync(file);
 
-        using var doc = JsonDocument.Parse(json);
-        var ifx = doc.RootElement.GetProperty("database").GetProperty("ifx");
-        var lpf = ifx.GetProperty("AA_LPF");
+        using var document = JsonDocument.Parse(resultJson);
+        var ifxElement = document.RootElement
+                                 .GetProperty(TestConstants.JsonKeys.Database)
+                                 .GetProperty(TestConstants.JsonKeys.Ifx);
+        var lpfElement = ifxElement.GetProperty(TestConstants.Effects.AA_LPF);
 
-        lpf.TryGetProperty("Rate", out _).Should().BeTrue();
-        lpf.TryGetProperty("Depth", out _).Should().BeTrue();
-        lpf.TryGetProperty("Resonance", out _).Should().BeTrue();
-        lpf.TryGetProperty("Cutoff", out _).Should().BeTrue();
-        lpf.TryGetProperty("Step Rate", out _).Should().BeTrue();
+        lpfElement.TryGetProperty(TestConstants.Params.Rate, out _).Should().BeTrue();
+        lpfElement.TryGetProperty(TestConstants.Params.Depth, out _).Should().BeTrue();
+        lpfElement.TryGetProperty(TestConstants.Params.Resonance, out _).Should().BeTrue();
+        lpfElement.TryGetProperty(TestConstants.Params.Cutoff, out _).Should().BeTrue();
+        lpfElement.TryGetProperty(TestConstants.Params.StepRate, out _).Should().BeTrue();
     }
 
     [Fact]
     public async Task ImportAndSanitizeAsync_Propagates_Validation_Errors_As_InvalidDataException()
     {
-        var validator = Validators.WithErrors("Missing <database>");
+        const string inputFileName = "broken.rc0";
+        const string missingDatabaseError = "Missing <database>";
+
+        var validator = MockFactories.CreateValidatorWithErrors(missingDatabaseError);
         var sut = new Rc0Importer(validator.Object);
 
-        var file = MockFiles.FromString("broken.rc0", XmlSamples.MissingDatabase);
-        var act = async () => await sut.ImportAndSanitizeAsync(file);
+        var file = MockFiles.CreateFromString(inputFileName, XmlSamples.MissingDatabase);
+        var actAsync = async () => await sut.ImportAndSanitizeAsync(file);
 
-        await act.Should().ThrowAsync<InvalidDataException>()
-                 .WithMessage("*RC0 validation failed*");
+        await actAsync.Should().ThrowAsync<InvalidDataException>()
+                      .WithMessage($"*{TestConstants.ValidationMessages.Rc0ValidationFailedContains}*");
     }
 
     [Fact]
     public async Task ImportAndSanitizeAsync_Cleans_Numeric_And_Symbol_Tags_And_Drops_Count()
     {
-        var validator = Validators.AlwaysOk();
+        const string inputFileName = "weird.rc0";
+        const string removedNodeName = "count";
+
+        var validator = MockFactories.CreateValidatorThatAlwaysSucceeds();
         var sut = new Rc0Importer(validator.Object);
 
-        var file = MockFiles.FromString("weird.rc0", XmlSamples.WeirdNumericAndSymbolAndCount);
+        var file = MockFiles.CreateFromString(inputFileName, XmlSamples.WeirdNumericAndSymbolAndCount);
 
-        var json = await sut.ImportAndSanitizeAsync(file);
+        var resultJson = await sut.ImportAndSanitizeAsync(file);
 
-        using var doc = JsonDocument.Parse(json);
-        var lpf = doc.RootElement.GetProperty("database").GetProperty("ifx").GetProperty("AA_LPF");
+        using var document = JsonDocument.Parse(resultJson);
+        var lpfElement = document.RootElement
+                                 .GetProperty(TestConstants.JsonKeys.Database)
+                                 .GetProperty(TestConstants.JsonKeys.Ifx)
+                                 .GetProperty(TestConstants.Effects.AA_LPF);
 
-        lpf.TryGetProperty("Rate", out _).Should().BeTrue();
-        json.Should().NotContain("count");
+        lpfElement.TryGetProperty(TestConstants.Params.Rate, out _).Should().BeTrue();
+        resultJson.Should().NotContain(removedNodeName);
     }
 
     [Fact]
     public async Task ImportAndSanitizeAsync_Clamps_OutOfRange_To_Meta_MinMax()
     {
-        var validator = Validators.AlwaysOk();
+        const string inputFileName = "clamp.rc0";
+        const string expectedClampedRate = "114";
+
+        var validator = MockFactories.CreateValidatorThatAlwaysSucceeds();
         var sut = new Rc0Importer(validator.Object);
 
-        var file = MockFiles.FromString("clamp.rc0", XmlSamples.Clamp_AA_LPF_A_TooHigh);
+        var file = MockFiles.CreateFromString(inputFileName, XmlSamples.Clamp_AA_LPF_A_TooHigh);
 
-        var json = await sut.ImportAndSanitizeAsync(file);
+        var resultJson = await sut.ImportAndSanitizeAsync(file);
 
-        using var doc = JsonDocument.Parse(json);
-        var rate = doc.RootElement
-                      .GetProperty("database")
-                      .GetProperty("ifx")
-                      .GetProperty("AA_LPF")
-                      .GetProperty("Rate")
-                      .GetProperty("_text")
-                      .GetString();
+        using var document = JsonDocument.Parse(resultJson);
+        var rateValue = document.RootElement
+                                .GetProperty(TestConstants.JsonKeys.Database)
+                                .GetProperty(TestConstants.JsonKeys.Ifx)
+                                .GetProperty(TestConstants.Effects.AA_LPF)
+                                .GetProperty(TestConstants.Params.Rate)
+                                .GetProperty(TestConstants.JsonKeys.Text)
+                                .GetString();
 
-        rate.Should().Be("114");
+        rateValue.Should().Be(expectedClampedRate);
     }
 }
