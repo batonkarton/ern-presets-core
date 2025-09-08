@@ -17,11 +17,10 @@ jobs:
       run: |
         dotnet tool install --global dotnet-coverage
         echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-    - uses: SonarSource/sonarcloud-github-action@master
-      with:
-        projectKey: ${{ secrets.SONAR_PROJECT_KEY }}
-        organization: ${{ secrets.SONAR_ORG }}
-        token: ${{ secrets.SONAR_TOKEN }}
+    - name: SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@v5.3.1
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     - name: Build Solution
       id: build
       run: dotnet build --configuration Release
