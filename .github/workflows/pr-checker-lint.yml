@@ -20,8 +20,8 @@ jobs:
         echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
     - name: SonarCloud Begin
       run: dotnet-sonarscanner begin \
-              /k:"${{ secrets.SONAR_PROJECT_KEY }}" \
-              /o:"${{ secrets.SONAR_ORG }}" \
+              /k="${{ secrets.SONAR_PROJECT_KEY }}" \
+              /o="${{ secrets.SONAR_ORG }}" \
               /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
               /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
     - name: Build Solution
