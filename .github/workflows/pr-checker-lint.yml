@@ -19,11 +19,12 @@ jobs:
         dotnet tool install --global dotnet-coverage
         echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
     - name: SonarCloud Begin
-      run: dotnet sonarscanner begin \
-          /k:"${{ secrets.SONAR_PROJECT_KEY }}" \
-          /o:"${{ secrets.SONAR_ORG }}" \
-          /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
-          /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
+      run: |
+        dotnet sonarscanner begin \
+        /key:"${{ secrets.SONAR_PROJECT_KEY }}" \
+        /organization:"${{ secrets.SONAR_ORG }}" \
+        /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
+        /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
     - name: Build Solution
       id: build
       run: dotnet build --configuration Release
