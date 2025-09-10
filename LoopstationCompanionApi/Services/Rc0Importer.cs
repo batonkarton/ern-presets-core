@@ -11,7 +11,6 @@ namespace LoopstationCompanionApi.Services
     {
         public class Rc0Importer(IRc0Validator validator) : IRc0Importer
         {
-            private readonly IRc0Validator _validator = validator;
             private static readonly TimeSpan RegexTimeout = TimeSpan.FromSeconds(2);
 
             public async Task<string> ImportAndSanitizeAsync(IFormFile file, CancellationToken ct = default)
@@ -30,7 +29,7 @@ namespace LoopstationCompanionApi.Services
                 var raw = await reader.ReadToEndAsync(ct);
 
                 var cleaned = CleanXmlContent(raw);
-                var errors = await _validator.ValidateAsync(cleaned, ct);
+                var errors = await validator.ValidateAsync(cleaned, ct);
                 if (errors.Count > 0)
                     throw new InvalidDataException("RC0 validation failed: " + ErrorUtils.JoinMessages(errors));
 

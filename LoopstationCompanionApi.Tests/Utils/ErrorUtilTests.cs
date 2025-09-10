@@ -18,5 +18,13 @@ namespace LoopstationCompanionApi.Tests.Utils
             var joined = ErrorUtils.JoinMessages([]);
             joined.Should().BeEmpty();
         }
+
+        [Fact]
+        public void JoinMessages_Throws_When_Null()
+        {
+            Action act = () => ErrorUtils.JoinMessages(null!);
+            act.Should().Throw<ArgumentNullException>();
+        }
+
     }
 }
