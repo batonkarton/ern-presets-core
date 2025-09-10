@@ -7,29 +7,6 @@ namespace LoopstationCompanionApi.Services
         public static string GetDefaultPayloadJson() =>
             JsonSerializer.Serialize(BuildDefaultPayloadObject());
 
-        private static object BuildDefaultPayloadObject()
-        {
-            var ifx = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var effect in EffectMeta.EffectKeys())
-            {
-                var paramDict = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-
-                foreach (var kv in EffectMeta.Params(effect))
-                {
-                    var meta = kv.Value;
-                    paramDict[meta.Label] = new Dictionary<string, string>
-                    {
-                        ["_text"] = meta.Default.ToString()
-                    };
-                }
-
-                ifx[effect] = paramDict;
-            }
-
-            return new { database = new { ifx } };
-        }
-
         /// <summary>
         /// Merge a partially built IFX dictionary (effect -> { label -> {"_text": "..."} })
         /// with defaults from EffectMeta. Ensures every known effect/param exists with a value.
@@ -79,6 +56,29 @@ namespace LoopstationCompanionApi.Services
                     result[kv.Key] = kv.Value;
 
             return result;
+        }
+
+        private static object BuildDefaultPayloadObject()
+        {
+            var ifx = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var effect in EffectMeta.EffectKeys())
+            {
+                var paramDict = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var kv in EffectMeta.Params(effect))
+                {
+                    var meta = kv.Value;
+                    paramDict[meta.Label] = new Dictionary<string, string>
+                    {
+                        ["_text"] = meta.Default.ToString()
+                    };
+                }
+
+                ifx[effect] = paramDict;
+            }
+
+            return new { database = new { ifx } };
         }
 
         private static object? GetChildRaw(IDictionary<string, object>? dict, string key)

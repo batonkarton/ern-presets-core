@@ -5,18 +5,12 @@ using System.Text.Json;
 
 namespace LoopstationCompanionApi.Services
 {
-    public class PresetService : IPresetService
+    public class PresetService(IPresetRepository repo, IRc0Importer importer) : IPresetService
     {
-        private readonly IPresetRepository _repo;
-        private readonly IRc0Importer _importer;
-        public PresetService(IPresetRepository repo, IRc0Importer importer)
-        {
-            _repo = repo;
-            _importer = importer;
-        }
+
         public async Task<IReadOnlyList<PresetSummary>> GetAllAsync(int page, int pageSize)
         {
-            var dtos = await _repo.GetAllSummariesAsync(page, pageSize);
+            var dtos = await repo.GetAllSummariesAsync(page, pageSize);
 
             return dtos.Select(dto =>
             {
@@ -33,7 +27,7 @@ namespace LoopstationCompanionApi.Services
 
         public async Task<Preset?> GetByIdAsync(Guid id)
         {
-            var dto = await _repo.GetByIdAsync(id);
+            var dto = await repo.GetByIdAsync(id);
             return dto is null ? null : MapToModel(dto);
         }
 
@@ -48,33 +42,39 @@ namespace LoopstationCompanionApi.Services
                 PayloadJson = DefaultPayloadFactory.GetDefaultPayloadJson()
             };
 
-            var saved = await _repo.CreateAsync(dto);
+            var saved = await repo.CreateAsync(dto);
             return MapToModel(saved);
         }
 
         public async Task<Preset?> UpdateAsync(Guid id, Preset preset)
         {
-            var existing = await _repo.GetByIdAsync(id);
+            var existing = await repo.GetByIdAsync(id);
             if (existing is null) return null;
 
-            existing.Name = preset.Name;
-            existing.DeviceModel = preset.DeviceModel.ToString();
-            existing.UpdatedAt = DateTime.UtcNow;
+            var dto = new PresetDto
+            {
+                Id = id,
+                Name = preset.Name,
+                DeviceModel = preset.DeviceModel.ToString(),
+                UpdatedAt = DateTime.UtcNow,
+                PayloadJson = existing.PayloadJson
+            };
 
-            var saved = await _repo.UpdateAsync(id, existing);
+            var saved = await repo.UpdateAsync(id, dto);
             return saved is null ? null : MapToModel(saved);
         }
 
-        public Task<bool> DeleteAsync(Guid id) => _repo.DeleteAsync(id);
+
+        public Task<bool> DeleteAsync(Guid id) => repo.DeleteAsync(id);
 
         public async Task<Preset?> ImportRc0Async(Guid id, IFormFile file, CancellationToken ct = default)
         {
-            var existing = await _repo.GetByIdAsync(id);
+            var existing = await repo.GetByIdAsync(id);
             if (existing is null) return null;
 
-            var payloadJson = await _importer.ImportAndSanitizeAsync(file, ct);
+            var payloadJson = await importer.ImportAndSanitizeAsync(file, ct);
 
-            var updated = await _repo.UpdatePayloadAsync(id, payloadJson, DateTime.UtcNow);
+            var updated = await repo.UpdatePayloadAsync(id, payloadJson, DateTime.UtcNow);
             return updated is null ? null : MapToModel(updated);
         }
 

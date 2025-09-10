@@ -1,4 +1,4 @@
-﻿namespace LoopstationCompanionApi.Services
+﻿namespace LoopstationCompanionApi.Utils
 {
     public static class ErrorUtils
     {
@@ -6,6 +6,6 @@
         /// Joins error messages in a consistent, testable way.
         /// </summary>
         public static string JoinMessages(IEnumerable<string> messages, string separator = "; ")
-            => string.Join(separator, messages ?? Array.Empty<string>());
+            => string.Join(separator, messages);
     }
 }
