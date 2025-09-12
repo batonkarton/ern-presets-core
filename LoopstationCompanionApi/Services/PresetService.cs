@@ -87,9 +87,10 @@ namespace LoopstationCompanionApi.Services
                     using var doc = JsonDocument.Parse(dto.PayloadJson);
                     payload = doc.RootElement.Clone();
                 }
-                catch
+                catch (JsonException ex)
                 {
-
+                    Console.Error.WriteLine($"Invalid JSON for preset {dto.Id}: {ex.Message}");
+                    payload = dto.PayloadJson;
                 }
             }
 
