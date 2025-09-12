@@ -7,7 +7,6 @@ namespace LoopstationCompanionApi.Services
 {
     public class PresetService(IPresetRepository repo, IRc0Importer importer) : IPresetService
     {
-
         public async Task<IReadOnlyList<PresetSummary>> GetAllAsync(int page, int pageSize)
         {
             var dtos = await repo.GetAllSummariesAsync(page, pageSize);

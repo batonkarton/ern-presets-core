@@ -82,7 +82,6 @@ namespace LoopstationCompanionApi.Services
                 return cleaned.Trim();
             }
 
-
             private static string SymbolToName(string symbol) => symbol switch
             {
                 "#" => XmlConstants.SymbolHash,
