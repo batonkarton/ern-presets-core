@@ -1,5 +1,4 @@
-﻿// Data/AppDbContext.cs
-using LoopstationCompanionApi.Dtos;
+﻿using LoopstationCompanionApi.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace LoopstationCompanionApi.Data
@@ -8,22 +7,34 @@ namespace LoopstationCompanionApi.Data
     {
         public DbSet<PresetDto> Presets => Set<PresetDto>();
 
-        protected override void OnModelCreating(ModelBuilder b)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            b.Entity<PresetDto>(e =>
+            modelBuilder.Entity<PresetDto>(entity =>
             {
-                e.ToTable("presets");
-                e.HasKey(x => x.Id);
+                entity.ToTable("presets");
+                entity.HasKey(preset => preset.Id);
 
-                e.Property(x => x.Id).HasColumnName("id");
-                e.Property(x => x.Name).HasColumnName("name").HasMaxLength(200).IsRequired();
-                e.Property(x => x.DeviceModel).HasColumnName("device_model").HasMaxLength(32).IsRequired();
-                e.Property(x => x.UpdatedAt).HasColumnName("updated_at").IsRequired();
+                entity.Property(preset => preset.Id)
+                      .HasColumnName("id");
+
+                entity.Property(preset => preset.Name)
+                      .HasColumnName("name")
+                      .HasMaxLength(200)
+                      .IsRequired();
+
+                entity.Property(preset => preset.DeviceModel)
+                      .HasColumnName("device_model")
+                      .HasMaxLength(32)
+                      .IsRequired();
+
+                entity.Property(preset => preset.UpdatedAt)
+                      .HasColumnName("updated_at")
+                      .IsRequired();
 
                 // (string in code, jsonb in DB)
-                e.Property(x => x.PayloadJson)
-                 .HasColumnName("payload_json")
-                 .HasColumnType("jsonb");
+                entity.Property(preset => preset.PayloadJson)
+                      .HasColumnName("payload_json")
+                      .HasColumnType("jsonb");
             });
         }
     }
