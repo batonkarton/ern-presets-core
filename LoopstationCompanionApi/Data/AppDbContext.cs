@@ -34,7 +34,7 @@ namespace LoopstationCompanionApi.Data
                 // (string in code, jsonb in DB)
                 entity.Property(preset => preset.PayloadJson)
                       .HasColumnName("payload_json")
-                      .HasColumnType("jsonb");
+                      .HasColumnType("json");
             });
         }
     }

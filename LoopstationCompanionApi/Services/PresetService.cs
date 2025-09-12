@@ -83,8 +83,15 @@ namespace LoopstationCompanionApi.Services
             object? payload = null;
             if (!string.IsNullOrWhiteSpace(dto.PayloadJson))
             {
-                try { payload = JsonSerializer.Deserialize<object>(dto.PayloadJson); }
-                catch { }
+                try
+                {
+                    using var doc = JsonDocument.Parse(dto.PayloadJson);
+                    payload = doc.RootElement.Clone();
+                }
+                catch
+                {
+
+                }
             }
 
             var model = DeviceModel.RC505mkII;
