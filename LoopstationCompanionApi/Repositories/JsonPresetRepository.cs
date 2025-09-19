@@ -12,6 +12,7 @@ namespace LoopstationCompanionApi.Repositories
             PropertyNameCaseInsensitive = true,
             WriteIndented = true
         };
+
         public JsonPresetRepository(IHostEnvironment env)
         {
             var dataDir = Path.Combine(env.ContentRootPath, "Data");
@@ -19,6 +20,7 @@ namespace LoopstationCompanionApi.Repositories
             _dbPath = Path.Combine(dataDir, "presets.json");
             EnsureFileWithSeed();
         }
+
         public async Task<IReadOnlyList<PresetSummaryDto>> GetAllSummariesAsync(int page, int pageSize)
         {
             if (page < 1) page = 1;
@@ -39,6 +41,7 @@ namespace LoopstationCompanionApi.Repositories
                 })
                 .ToList();
         }
+
         public async Task<PresetDto?> GetByIdAsync(Guid id)
         {
             var all = await LoadAllAsync();
@@ -61,6 +64,7 @@ namespace LoopstationCompanionApi.Repositories
 
             return toSave;
         }
+
         public async Task<PresetDto?> UpdateAsync(Guid id, PresetDto dto)
         {
             var all = await LoadAllAsync();
@@ -114,6 +118,7 @@ namespace LoopstationCompanionApi.Repositories
                 return Task.FromResult(all);
             }
         }
+
         private Task SaveAllAsync(List<PresetDto> presets)
         {
             lock (_gate)
@@ -123,6 +128,7 @@ namespace LoopstationCompanionApi.Repositories
                 return Task.CompletedTask;
             }
         }
+
         private void EnsureFileWithSeed()
         {
             if (File.Exists(_dbPath)) return;

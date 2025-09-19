@@ -1,13 +1,11 @@
 ﻿using LoopstationCompanionApi.Dtos;
 using LoopstationCompanionApi.Models;
 using LoopstationCompanionApi.Repositories;
-using System.Text.Json;
 
 namespace LoopstationCompanionApi.Services
 {
     public class PresetService(IPresetRepository repo, IRc0Importer importer) : IPresetService
     {
-
         public async Task<IReadOnlyList<PresetSummary>> GetAllAsync(int page, int pageSize)
         {
             var dtos = await repo.GetAllSummariesAsync(page, pageSize);
@@ -80,25 +78,18 @@ namespace LoopstationCompanionApi.Services
 
         private static Preset MapToModel(PresetDto dto)
         {
-            object? payload = null;
-            if (!string.IsNullOrWhiteSpace(dto.PayloadJson))
-            {
-                try { payload = JsonSerializer.Deserialize<object>(dto.PayloadJson); }
-                catch { }
-            }
-
-            var model = DeviceModel.RC505mkII;
-            Enum.TryParse(dto.DeviceModel, ignoreCase: true, out model);
-
             return new Preset
             {
                 Id = dto.Id,
                 Name = dto.Name,
-                DeviceModel = model,
+                DeviceModel = Enum.TryParse(dto.DeviceModel, ignoreCase: true, out DeviceModel model)
+                    ? model
+                    : DeviceModel.RC505mkII,
                 UpdatedAt = dto.UpdatedAt,
-                Payload = payload
+                Payload = string.IsNullOrWhiteSpace(dto.PayloadJson) ? null : dto.PayloadJson
             };
         }
+
 
         private static PresetDto MapToDto(Preset model) => new()
         {
