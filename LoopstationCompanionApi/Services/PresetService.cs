@@ -1,7 +1,6 @@
 ﻿using LoopstationCompanionApi.Dtos;
 using LoopstationCompanionApi.Models;
 using LoopstationCompanionApi.Repositories;
-using System.Text.Json;
 
 namespace LoopstationCompanionApi.Services
 {
@@ -79,33 +78,18 @@ namespace LoopstationCompanionApi.Services
 
         private static Preset MapToModel(PresetDto dto)
         {
-            object? payload = null;
-            if (!string.IsNullOrWhiteSpace(dto.PayloadJson))
-            {
-                try
-                {
-                    using var doc = JsonDocument.Parse(dto.PayloadJson);
-                    payload = doc.RootElement.Clone();
-                }
-                catch (JsonException ex)
-                {
-                    Console.Error.WriteLine($"Invalid JSON for preset {dto.Id}: {ex.Message}");
-                    payload = dto.PayloadJson;
-                }
-            }
-
-            var model = DeviceModel.RC505mkII;
-            Enum.TryParse(dto.DeviceModel, ignoreCase: true, out model);
-
             return new Preset
             {
                 Id = dto.Id,
                 Name = dto.Name,
-                DeviceModel = model,
+                DeviceModel = Enum.TryParse(dto.DeviceModel, ignoreCase: true, out DeviceModel model)
+                    ? model
+                    : DeviceModel.RC505mkII,
                 UpdatedAt = dto.UpdatedAt,
-                Payload = payload
+                Payload = string.IsNullOrWhiteSpace(dto.PayloadJson) ? null : dto.PayloadJson
             };
         }
+
 
         private static PresetDto MapToDto(Preset model) => new()
         {
